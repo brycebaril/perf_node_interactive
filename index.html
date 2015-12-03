@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Node.js Performance Optimization Case Study - Node Interactive</title>
+
+		<meta name="description" content="Node.js Performance Optimization Case Study - Node Interactive">
+		<meta name="author" content="Bryce B. Baril">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Node.js Performance Optimization</h1>
+					<h3>A Case Study</h3>
+					<p>
+						<small><a href="http://brycebaril.com">Bryce B. Baril</a> / <a href="http://twitter.com/brycebaril">@brycebaril</a></small>
+					</p>
+				</section>
+
+				<section data-markdown>
+					## 👤 Who Am I? 👤
+
+					* Lead engineer on [NSolid](https://downloads.nodesource.com/) at NodeSource
+					* Instructor for our node performance courses
+					* We do multi-day trainings on this content!
+					* NSolid is designed to make this process easier.
+				</section>
+
+				<section data-markdown>
+					## 🚀 Performance 🚀
+
+					With Node.js we have two key performance targets:
+					* Task Completion (User-experience)
+					* Throughput (Scale)
+				</section>
+
+				<section data-markdown>
+					## 🏗 Task Completion 🏗
+
+					"Work is done in a timely manner."
+				</section>
+
+				<section data-markdown>
+					## 🏗 Task Completion 🏗
+
+					With Node.js's event model, these are generally* asynchronous (IO-related) tasks.
+				</section>
+
+				<section data-markdown>
+					## 🏗 Task Completion 🏗
+
+					Key metric:
+
+					`task_end - task_start`
+				</section>
+
+				<section data-markdown>
+					## 🏭 Throughput 🏭
+
+					"Work isn't blocking other work."
+				</section>
+
+				<section data-markdown>
+					## 🏭 Throughput 🏭
+
+					Blocking (synchronous) time is generally JavaScript execution or garbage collection.
+				</section>
+
+				<section data-markdown>
+					## 🏭 Throughput 🏭
+
+					Key metric:
+
+					requests-per-second
+				</section>
+
+				<section data-markdown>
+					## 🏭 Throughput 🏭
+
+					**IMPORTANT**:
+					Blocking operations can cause cascading blockage resulting in significant task completion delays.
+				</section>
+
+
+				<section data-markdown>
+					## Case Study: Glitching .gif Images
+
+					* [readimage](http://npm.im/readimage) reads gif/png/jpg and converts to a common structure
+					* [glitcher](http://npm.im/glitcher) various image glitches and manpiulations
+					* [writegif](http://npm.im/writegif) write that common structure to an animated gif
+				</section>
+
+				<section>
+					<h2> 📝 Workflow 📝 </h2>
+					<ol start=0>
+						<li>❔ Is it fast enough?</li>
+						<li>🔍 Identify the nature of the problem. (🏗 vs 🏭)</li>
+						<li>🔬 Select tools based on the problem.</li>
+						<li>📐 Measure.</li>
+						<li>📍 Identify the location of the problem.</li>
+						<li>👓 Make the slower parts faster.</li>
+						<li>📐 Measure again.</li>
+						<li>🔁 Go back to step 0.</li>
+					</ol>
+				</section>
+
+				<section data-markdown>
+					## 🚨 WARNING 🚨
+
+					Do **NOT** skip straight to step 5. Randomly applied V8 compiler tricks are unlikely to have a significant impact.
+				</section>
+
+				<section data-markdown>
+					## ❔ 0. Is it fast enough? ❔
+
+					The logs show some images take well over a second to manipulate with the manipulation `replaceBackground`, and this is a blocking operation.
+				</section>
+
+				<section data-markdown>
+					## 🔍 1. Identify the nature of the problem 🔍
+
+					Based on logs and the code, I have identified the bulk of the time is the image manipulation. It's not doing any network calls or other asynchronous work.
+				</section>
+
+				<section data-markdown>
+					## 🙋 What if it was async? 🙋
+
+					* 🛠 Tools
+						* Logging
+						* APM (NewRelic, Dynatrace, etc.)
+					* 💪 Solutions
+						* Caching
+						* Query optimization
+						* etc.
+
+					(out of scope for this presentation)
+					Note:
+						These are usually infrequent and slow enough you can always log. This is essentially what APM vendors do for you automatically.
+				</section>
+
+				<section data-markdown>
+					## 💻 Our test harness 💻
+					```js
+					var THRESHOLD = 40
+					var image = /* read file, call readimage */
+					function fillBlack(frame) {
+						return frame.fill(0)
+					}
+					replaceBackground(image.frames, fillBlack, THRESHOLD)
+					/* call writegif on image, write to file */
+					```
+					Note:
+					replaceBackground calculates the median frame by comparing every pixel in every frame, then for each frame calculates the difference from that background frame
+				</section>
+
+				<section data-markdown>
+					## ⏳ Before ⏳
+					![Hotline Bling](img/bling2.gif)
+				</section>
+
+				<section data-markdown>
+					## ⌛ After ⌛
+					![Hotline Bling Manipulated](img/median_bling.gif)
+				</section>
+
+				<section data-markdown>
+					## 🔬 2. Select tools 🔬
+
+					For the purpose of this talk, we're going to look at:
+					* /usr/bin/time
+					* v8-profiler
+					* IRHydra2
+				</section>
+
+				<section data-markdown>
+					## 🛠 Blocking Operation Tools 🛠
+
+					* How slow is it?
+					* Where is the slowness at?
+					* Why is it slow?
+				</section>
+
+				<section data-markdown>
+					## 🛠 How slow is it? 🛠
+					* `/usr/bin/time`
+					* Benchmark tools (ab, siege, etc.)
+				</section>
+
+				<section data-markdown>
+					## 🛠 Where is the slowness at? 🛠
+					* Kernel tools (perf, dtrace, etc.)
+					* V8 Instrumentation (v8-profiler, [NSolid](http://downloads.nodesource.com))
+				</section>
+
+				<section data-markdown>
+					## 📐 3. Measure 📐
+
+					With our selected poor-performing image, we'll use `/usr/bin/time` to measure a baseline:
+
+					```txt
+					$ \time node harness.js ~/Downloads/bling2.gif
+8.67user 0.06system 0:08.71elapsed 100%CPU (0avgtext+0avgdata 181988maxresident)k
+0inputs+752outputs (0major+41833minor)pagefaults 0swaps
+				  ```
+				</section>
+
+				<section data-markdown>
+					## 📍 4. Identify the location 📍
+				</section>
+
+				<section data-markdown>
+					## 👓 5. Make the slower parts faster 👓
+				</section>
+
+				<section data-markdown>
+					## Some Math
+
+					Our image is 800 x 450 pixels with 51 frames
+					```txt
+					800 * 450 = 360000 pixels per frame
+					```
+				</section>
+
+				<section data-markdown>
+					## Median Frame
+					![Median Frame](img/median_frame.gif)
+				</section>
+
+				<section data-markdown>
+					## Mean Frame
+					![Mean Frame](img/mean_frame.gif)
+				</section>
+
+				<section data-markdown>
+					## ⌛ After 2 ⌛
+					![Mean Frame](img/mean_bling.gif)
+				</section>
+
+				<section data-markdown>
+					## 📐 6. Measure again 📐
+					```txt
+					$ \time node harness.js ~/Downloads/bling2.gif
+3.40user 0.04system 0:03.43elapsed 100%CPU (0avgtext+0avgdata 182048maxresident)k
+0inputs+704outputs (0major+44011minor)pagefaults 0swaps
+					```
+
+					8.67 seconds to 3.40 seconds!
+				</section>
+
+				<section data-markdown>
+## 🔁 7. Go back to step 0 🔁
+
+* Reduce instruction count
+* Even better algorithms?
+				</section>
+
+				<section data-markdown>
+					## Final Slide
+
+					[Bryce B. Baril](http://brycebaril.com)
+
+					[@brycebaril](http://twitter.com/brycebaril)
+				</section>
+
+				<section data-markdown>
+					## Check out NSolid!
+
+					Capture flamegraphs of a production process with the click of a button!
+
+				</section>
+
+
+
+
+
+
+				<section data-markdown>
+					## 🛠 Why is it slow? 🛠
+
+					If the problem is slow JavaScript execution:
+
+					* Optimizing compiler output (IRHydra, --prof, --trace-deopt)
+					* Code review
+					* Static analysis?
+				</section>
+
+				<section data-markdown>
+					## 🙋 What if it was garbage collection? 🙋
+
+					* 🛠 Tools
+						* Post-mortem analysis (mdb, lldb, etc.)
+						* Heap snapshots
+						* code/static analysis
+					* 💪 Solutions
+						* Fix errant closures
+						* Don't hold un-needed references
+						* Retain only the portions of large objects you need
+
+					(out of scope for this presentation)
+				</section>
+
+
+				<section>
+					<h2>💩 Reasons for Poor Performance 💩</h2>
+					<ul>
+						<li>Wrong tool for the job</li>
+						<li>Doing unnecessary things</li>
+						<li>Poor algorithm choice</li>
+						<li>Not cooperating with the runtime</li>
+					</ul>
+
+					<aside class="notes">
+						<ul>
+						<li>Node isn't great at everything: ssl termination, use nginx</li>
+						<li>don't create functions in loops, avoid Promises</li>
+						<li>decrease instruction count</li>
+						<li>optimizing compiler makes assumptions, work with it, avoid invalidating assumptions</li>
+						</ul>
+					</aside>
+				</section>
+
+
+				<section>
+					<h2> 📝 Workflow 📝 </h2>
+					<ol start=0>
+						<li>❔ Is it fast enough?</li>
+						<li>🔍 Identify the nature of the problem. (🏗 vs 🏭)</li>
+						<li>🔬 Select tools based on the problem.</li>
+						<li>📐 Measure.</li>
+						<li>📍 Identify the location of the problem.</li>
+						<li>👓 Make the slower parts faster.</li>
+						<li>📐 Measure again.</li>
+						<li>🔁 Go back to step 0.</li>
+					</ol>
+				</section>
+
+				<section data-markdown>
+					is it fast enough? (set goal)
+					identify the nature of the problem (function execution time)
+					select tools
+					measure
+					identify the location of the problem
+					make the slower parts faster
+					measure again
+				</section>
+
+				<section data-markdown>
+					## Tools
+
+					* time
+					* prof
+					* NSolid? v8-profiler?
+					* IRHydra
+
+					Why those tools?
+				</section>
+
+				<section data-markdown>
+					## Flamegraph collected using the Linux `prof` tool
+				</section>
+
+				<section data-markdown>
+					## How to analyze a flamegraph
+				</section>
+
+				<section data-markdown>
+					## v8-profiler or NSolid output
+				</section>
+
+				<section data-markdown>
+					## IRHydra output
+				</section>
+
+				<section data-markdown>
+					## How to IRHydra
+				</section>
+
+				<section data-markdown>
+					## Results
+				</section>
+
+
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
