@@ -247,7 +247,33 @@
 				</section>
 
 				<section data-markdown>
+					## 🛠 Why is it slow? 🛠
+
+					If the problem is slow JavaScript execution:
+
+					* Optimizing compiler output (IRHydra, --prof, --trace-deopt)
+					* Code review
+					* Static analysis?
+				</section>
+
+				<section data-markdown>
 					## 👓 5. Make the slower parts faster 👓
+				</section>
+
+
+				<section data-markdown>
+## 💩 Reasons for Poor Performance 💩
+
+* Wrong tool for the job
+* Doing unnecessary things
+* Poor algorithm choice
+* Not cooperating with the runtime
+
+Note:
+* Node isn't great at everything: ssl termination, use nginx
+* don't create functions in loops, avoid Promises
+* decrease instruction count
+* optimizing compiler makes assumptions, work with it, avoid invalidating assumptions
 				</section>
 
 				<section data-markdown>
@@ -260,6 +286,12 @@
 
 				<section data-markdown>
 					irhydra2 things it shows
+				</section>
+
+				<section data-markdown>
+					Huh... avg gets deoptimized...
+
+					https://github.com/nodejs/node/pull/4158
 				</section>
 
 				<section data-markdown>
@@ -330,124 +362,12 @@
 					[@brycebaril](http://twitter.com/brycebaril)
 				</section>
 
-				<section data-markdown>
+				<section data-markdown data-background="img/cpu-profile-nsolid-flamegraph.png">
 					## Check out NSolid!
 
 					Capture flamegraphs of a production process with the click of a button!
 
 				</section>
-
-
-
-
-
-
-				<section data-markdown>
-					## 🛠 Why is it slow? 🛠
-
-					If the problem is slow JavaScript execution:
-
-					* Optimizing compiler output (IRHydra, --prof, --trace-deopt)
-					* Code review
-					* Static analysis?
-				</section>
-
-				<section data-markdown>
-					## 🙋 What if it was garbage collection? 🙋
-
-					* 🛠 Tools
-						* Post-mortem analysis (mdb, lldb, etc.)
-						* Heap snapshots
-						* code/static analysis
-					* 💪 Solutions
-						* Fix errant closures
-						* Don't hold un-needed references
-						* Retain only the portions of large objects you need
-
-					(out of scope for this presentation)
-				</section>
-
-
-				<section>
-					<h2>💩 Reasons for Poor Performance 💩</h2>
-					<ul>
-						<li>Wrong tool for the job</li>
-						<li>Doing unnecessary things</li>
-						<li>Poor algorithm choice</li>
-						<li>Not cooperating with the runtime</li>
-					</ul>
-
-					<aside class="notes">
-						<ul>
-						<li>Node isn't great at everything: ssl termination, use nginx</li>
-						<li>don't create functions in loops, avoid Promises</li>
-						<li>decrease instruction count</li>
-						<li>optimizing compiler makes assumptions, work with it, avoid invalidating assumptions</li>
-						</ul>
-					</aside>
-				</section>
-
-
-				<section>
-					<h2> 📝 Workflow 📝 </h2>
-					<ol start=0>
-						<li>❔ Is it fast enough?</li>
-						<li>🔍 Identify the nature of the problem. (🏗 vs 🏭)</li>
-						<li>🔬 Select tools based on the problem.</li>
-						<li>📐 Measure.</li>
-						<li>📍 Identify the location of the problem.</li>
-						<li>👓 Make the slower parts faster.</li>
-						<li>📐 Measure again.</li>
-						<li>🔁 Go back to step 0.</li>
-					</ol>
-				</section>
-
-				<section data-markdown>
-					is it fast enough? (set goal)
-					identify the nature of the problem (function execution time)
-					select tools
-					measure
-					identify the location of the problem
-					make the slower parts faster
-					measure again
-				</section>
-
-				<section data-markdown>
-					## Tools
-
-					* time
-					* prof
-					* NSolid? v8-profiler?
-					* IRHydra
-
-					Why those tools?
-				</section>
-
-				<section data-markdown>
-					## Flamegraph collected using the Linux `prof` tool
-				</section>
-
-				<section data-markdown>
-					## How to analyze a flamegraph
-				</section>
-
-				<section data-markdown>
-					## v8-profiler or NSolid output
-				</section>
-
-				<section data-markdown>
-					## IRHydra output
-				</section>
-
-				<section data-markdown>
-					## How to IRHydra
-				</section>
-
-				<section data-markdown>
-					## Results
-				</section>
-
-
 
 			</div>
 
@@ -466,7 +386,7 @@
 				history: true,
 				center: true,
 
-				transition: 'slide', // none/fade/slide/convex/concave/zoom
+				transition: 'none', // none/fade/slide/convex/concave/zoom
 
 				// Optional reveal.js plugins
 				dependencies: [
