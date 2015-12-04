@@ -40,21 +40,7 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section>
-					<h1>Node.js Performance Optimization</h1>
-					<h3>A Case Study</h3>
-					<p>
-						<small><a href="http://brycebaril.com">Bryce B. Baril</a> / <a href="http://twitter.com/brycebaril">@brycebaril</a></small>
-					</p>
-				</section>
-
-				<section data-markdown>
-					## 👤 Who Am I? 👤
-
-					* Lead engineer on [NSolid](https://downloads.nodesource.com/) at NodeSource
-					* Instructor for our node performance courses
-					* We do multi-day trainings on this content!
-					* NSolid is designed to make this process easier.
+				<section data-background="img/title_slide.png">
 				</section>
 
 				<section data-markdown>
@@ -114,11 +100,12 @@
 
 
 				<section data-markdown>
-					## Case Study: Glitching .gif Images
+					## 🖼 Glitching .gif Images 🖼
+					### Case Study
 
-					* [readimage](http://npm.im/readimage) reads gif/png/jpg and converts to a common structure
+					* [readimage](http://npm.im/readimage) reads gif/png/jpg and converts to a common format
 					* [glitcher](http://npm.im/glitcher) various image glitches and manpiulations
-					* [writegif](http://npm.im/writegif) write that common structure to an animated gif
+					* [writegif](http://npm.im/writegif) write that common format to an animated gif
 				</section>
 
 				<section>
@@ -240,7 +227,43 @@
 				</section>
 
 				<section data-markdown>
+					Perf tool how to
+				</section>
+
+				<section data-markdown>
+					Perf tool results
+				</section>
+
+				<section data-markdown>
+					How to read a flamegraph
+				</section>
+
+				<section data-markdown>
+					v8-profiler how to
+				</section>
+
+				<section data-markdown>
+					v8-profiler results
+				</section>
+
+				<section data-markdown>
 					## 👓 5. Make the slower parts faster 👓
+				</section>
+
+				<section data-markdown>
+					irhydra2 how to
+				</section>
+
+				<section data-markdown>
+					irhydra2 results
+				</section>
+
+				<section data-markdown>
+					irhydra2 things it shows
+				</section>
+
+				<section data-markdown>
+					code analysis
 				</section>
 
 				<section data-markdown>
@@ -279,10 +302,24 @@
 				</section>
 
 				<section data-markdown>
+					after svg
+				</section>
+
+				<section data-markdown>
+					after v8-profiler
+				</section>
+
+				<section data-markdown>
 ## 🔁 7. Go back to step 0 🔁
 
+* Fix `copy` -- remove call to it?
 * Reduce instruction count
 * Even better algorithms?
+				</section>
+
+				<section data-markdown>
+					\time after removing call to Buffer::Copy
+					another second!
 				</section>
 
 				<section data-markdown>
