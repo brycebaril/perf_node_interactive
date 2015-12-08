@@ -47,49 +47,29 @@
         <section data-markdown>
           ## 🚀 Performance 🚀
 
-          With Node.js we have two key performance targets:
+          Two primary performance targets:
           * Task Completion (User-experience)
           * Throughput (Scale)
         </section>
 
         <section data-markdown>
-          ## 🏗 Task Completion 🏗
+## 🏗 Task Completion 🏗
 
-          "Work is done in a timely manner."
+"Work is done in a timely manner."
+
+Often includes (and dominated by) to Asynchronous IO in Node.js
+
+`task_end - task_start`
         </section>
 
         <section data-markdown>
-          ## 🏗 Task Completion 🏗
+## 🏭 Throughput 🏭
 
-          With Node.js's event model, these are generally* asynchronous (IO-related) tasks.
-        </section>
+"Work isn't blocking other work."
 
-        <section data-markdown>
-          ## 🏗 Task Completion 🏗
+Usually Javascript execution or Garbage Collection in Node.js
 
-          Key metric:
-
-          `task_end - task_start`
-        </section>
-
-        <section data-markdown>
-          ## 🏭 Throughput 🏭
-
-          "Work isn't blocking other work."
-        </section>
-
-        <section data-markdown>
-          ## 🏭 Throughput 🏭
-
-          Blocking (synchronous) time is generally JavaScript execution or garbage collection.
-        </section>
-
-        <section data-markdown>
-          ## 🏭 Throughput 🏭
-
-          Key metric:
-
-          requests-per-second
+`requests-per-second`
         </section>
 
         <section data-markdown>
@@ -97,6 +77,12 @@
 
           **IMPORTANT**:
           Blocking operations can cause cascading blockage resulting in significant task completion delays.
+
+          Note:
+          A,B,C scheduled at the same time, each will take 10ms
+          A takes 10ms
+          B takes 10ms plus A's 10ms so 20ms
+          C takes 10ms plus A and B, so 30ms
         </section>
 
 
@@ -127,6 +113,9 @@
           ## 🚨 WARNING 🚨
 
           Do **NOT** skip straight to step 5. Randomly applied V8 compiler tricks are unlikely to have a significant impact.
+
+          Note:
+          Saving 20ms on a task that includes a 5 second database query won't provide a significant improvement.
         </section>
 
         <section data-markdown>
@@ -185,15 +174,7 @@
         <section data-markdown>
           ## 🔬 2. Select tools 🔬
 
-          For the purpose of this talk, we're going to look at:
-          * /usr/bin/time
-          * linux `prof` tool
-          * v8-profiler
-          * IRHydra2
-        </section>
-
-        <section data-markdown>
-          ## 🛠 Tool Categories 🛠
+          We're going to need tools to answer these questions:
 
           * How slow is it?
           * Where is the slowness at?
@@ -233,7 +214,7 @@
           * Captures full stack, C++ & JS execution
           * Follow [these instructions](https://gist.github.com/trevnorris/9616784)
 
-          (They are not up-to-date but the steps are all right)
+          (They are not up-to-date but the steps are all there)
         </section>
 
         <section data-markdown>
@@ -279,7 +260,7 @@
 
           If the problem is slow JavaScript execution:
 
-          * Optimizing compiler output (IRHydra, --prof, --trace-deopt)
+          * Compiler tracing (IRHydra, --prof, --trace-deopt)
           * Code review
           * Static analysis?
         </section>
@@ -310,13 +291,28 @@
 * Wrong tool for the job
 * Doing unnecessary things
 * Poor algorithm choice
-* Not cooperating with the runtime
+* Not cooperating with the runtime/compiler
 
 Note:
 * Node isn't great at everything: ssl termination, use nginx
 * don't create functions in loops, avoid Promises
 * decrease instruction count
 * optimizing compiler makes assumptions, work with it, avoid invalidating assumptions
+        </section>
+
+        <section data-markdown>
+## ⚙ Optimizing Compilers (Simplified) ⚙
+
+* JavaScript is extremely flexible. Most code doesn't use that flexibility.
+
+* Optimizing compilers make assumptions on how you use JS and cut corners with optimised assembly code.
+
+* Deoptimization is when you invalidate the assumptions it made, forcing it to discard the assembly version.
+
+Note:
+* Parse and analyze your code as it is executed making optimized assembly based on what it encounters with guards against cases it skipped.
+
+* If you deoptimize a function too many times it will give up on optimization.
         </section>
 
         <section data-markdown>
@@ -432,6 +428,8 @@ Capture flamegraphs of a production process with the click of a button!
 Bryce B. Baril - [http://brycebaril.com](http://brycebaril.com)
 
 Twitter: [@brycebaril](http://twitter.com/brycebaril)
+
+NSolid: [Try NSolid!](http://downloads.nodesource.com)
         </section>
 
       </div>
