@@ -174,7 +174,7 @@ Usually Javascript execution or Garbage Collection in Node.js
         <section data-markdown>
           ## 🔬 2. Select tools 🔬
 
-          We're going to need tools to answer these questions:
+          Most tools fall into one of three categories:
 
           * How slow is it?
           * Where is the slowness at?
@@ -304,9 +304,7 @@ Note:
 ## ⚙ Optimizing Compilers (Simplified) ⚙
 
 * JavaScript is extremely flexible. Most code doesn't use that flexibility.
-
-* Optimizing compilers make assumptions on how you use JS and cut corners with optimised assembly code.
-
+* Optimizing compilers make assumptions on how you use JS and cut corners with optimized assembly code.
 * Deoptimization is when you invalidate the assumptions it made, forcing it to discard the assembly version.
 
 Note:
@@ -335,8 +333,8 @@ Note:
 ## 🔎 Analysis 🔎
 
 * the `avg` function had an eager deoptimization
-* ... but it was the inlined Buffer constructor in node core!
-* (So I filed a [PR against node](https://github.com/nodejs/node/pull/4158))
+* ... but it was the inlined Buffer constructor in node core ...
+* (So I filed a [PR against node](https://github.com/nodejs/node/pull/4158), released today in 5.2.0)
 * otherwise nothing too interesting ¯\\\_(ツ)_/¯
         </section>
 
@@ -346,6 +344,8 @@ Note:
 `avg()` calls `medianPixel()`
 
 The algorithm to calculate `median` requires a sort
+Note:
+We don't see medianPixel in the flamegraph or v8-profiler output because it was inlined.
         </section>
 
         <section data-markdown>
